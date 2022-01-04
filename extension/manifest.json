@@ -15,6 +15,7 @@
     }
   ],
   "web_accessible_resources": [
+    "next.html",
     "devtools.html",
     "devtools-background.html"
   ],
