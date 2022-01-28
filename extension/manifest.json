@@ -4,20 +4,18 @@
   "version": "1.0",
   "permissions": ["cookies"],
   "icons": {
-    "16": "icons/16-beta.png",
-    "48": "icons/48-beta.png",
-    "128": "icons/128-beta.png"
+    "16": "dist/icons/icon.png",
+    "48": "dist/icons/icon.png",
+    "128": "dist/icons/icon.png"
   },
   "content_scripts": [
     {
       "matches": ["https://*/*"],
-      "js": ["content-script.js"]
+      "js": ["dist/content-script.js"]
     }
   ],
   "web_accessible_resources": [
-    "next.html",
-    "devtools.html",
-    "devtools-background.html"
+    "dist/devtools-background.html"
   ],
-  "devtools_page": "devtools-background.html"
+  "devtools_page": "dist/devtools-background.html"
 }

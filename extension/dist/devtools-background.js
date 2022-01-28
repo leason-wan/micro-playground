@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
-  'Phoenix', 'icons/128.png', 'next.html',
+  'Phoenix', 'icons/icon.png', 'front/out/index.html',
   panel => {
     // panel loaded
     // panel.onShown.addListener(onPanelShown)
