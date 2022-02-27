@@ -1,7 +1,7 @@
 // {
 //   name: string // 子应用名称
-//   props: object // 注入的props
-//   isEmptyLayout: boolean // 是否自定义布局
+//   entry: string 
+//   activeRule: string 
 // }
 export default [
   {

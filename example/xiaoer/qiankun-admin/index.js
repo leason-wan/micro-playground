@@ -52,6 +52,9 @@ function install(Vue) {
         });
       }
     },
+    beforeDestroy() {
+      containerInstence = null;
+    }
   })
 }
 
