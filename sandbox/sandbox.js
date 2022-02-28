@@ -1,10 +1,12 @@
 import {corePlugin} from "./plugins/index.js";
 
 function genCode(code, proxyWindow) {
-  window.SANDBOX_GLOBAL = proxyWindow;
-  return `;(function(window){
-    ${code}
-  })(window.SANDBOX_GLOBAL);`;
+  window.SANDBOX_GLOBAL_CONTEXT = proxyWindow;
+  return `;(function(window, self){
+    with(window) {
+      ${code}
+    }
+  }).call(window.SANDBOX_GLOBAL_CONTEXT, window.SANDBOX_GLOBAL_CONTEXT, window.SANDBOX_GLOBAL_CONTEXT);`;
 }
 
 function createSandbox(plugins = []) {
@@ -12,18 +14,22 @@ function createSandbox(plugins = []) {
     running: false
   };
   const rawWindow = window;
-  let fakeWindow = {};
+  let fakeWindow = Object.create(null);
   plugins = [corePlugin, ...plugins];
 
   sandbox.run = function run(code) {
-    const sandboxHandler = {
+    // proxy vars
+    sandbox.global = new Proxy(fakeWindow, {
       get(target, property) {
-        // 优先从代理对象上取值
+        // avoid who using window.window or window.self to escape the sandbox environment to touch the really window
+        if (property === 'top' || property === 'parent' || property === 'window' || property === 'self') {
+          return sandbox.global;
+        }
         if (Reflect.has(target, property)) {
           return Reflect.get(target, property)
         }
-        // 否则兜底到window对象上取值
-        const rawValue = Reflect.get(rawWindow, property)
+        // 兜底到window对象上取值
+        const rawValue = Reflect.get(rawWindow, property);
         // 如果兜底的值为函数，则需要绑定window对象，如：console、alert等
         if (typeof rawValue === 'function') {
           const valueStr = rawValue.toString()
@@ -32,8 +38,7 @@ function createSandbox(plugins = []) {
             return rawValue.bind(rawWindow)
           }
         }
-        // 其它情况直接返回
-        return rawValue
+        return Reflect.get(rawWindow, property);
       },
       set(target, property, value) {
         target[property] = value;
@@ -42,15 +47,12 @@ function createSandbox(plugins = []) {
       has(target, p) {
         return p in target || p in rawWindow;
       },
-    };
-    // proxy vars
-    fakeWindow = new Proxy(fakeWindow, sandboxHandler);
-
+    });
     plugins.forEach((plugin) => {
       const {beforeStart} = plugin;
-      beforeStart(fakeWindow);
+      beforeStart(sandbox.global);
     })
-    const _code = genCode(code, fakeWindow);
+    const _code = genCode(code, sandbox.global);
     try {
       (0, eval)(_code);
       sandbox.running = true;
@@ -62,10 +64,10 @@ function createSandbox(plugins = []) {
   sandbox.destory = function destory() {
     plugins.forEach((plugin) => {
       const {beforeDestroy} = plugin;
-      beforeDestroy(fakeWindow);
+      beforeDestroy(sandbox.global);
     })
     sandbox.running = false;
-    fakeWindow = {};
+    sandbox.global = {};
   }
 
   return sandbox;

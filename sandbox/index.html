@@ -14,20 +14,21 @@
     
     const code = `
       // test proxy vars
-      window.name = 'name of sandBox window';
-      console.log(window.name);
-      console.log(window.nameOutside);
+      foo = 'foo in sandBox';
+      console.log(foo);
       // test listeners
       window.addEventListener('click', function() {
         console.log('you click the window');
       });
       // test interval
       window.setInterval(() => console.log('interval print!'), 1000)
+      alert('Hello from sandbox');
     `;
 
     const sandbox = createSandbox();
-    window.nameOutside = 'name of outside window';
+    window.foo = 'foo in global';
     sandbox.run(code);
+    window.sandbox = sandbox;
     display();
 
     function display() {
