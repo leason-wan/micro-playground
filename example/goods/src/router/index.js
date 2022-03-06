@@ -6,7 +6,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/list',
+    path: '/',
     name: 'List',
     component: () => import(/* webpackChunkName: "List" */ '../views/List.vue')
   },
