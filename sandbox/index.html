@@ -22,12 +22,13 @@
       });
       // test interval
       window.setInterval(() => console.log('interval print!'), 1000)
-      alert('Hello from sandbox');
+      window.alert('Hello from sandbox');
     `;
 
     const sandbox = createSandbox();
     window.foo = 'foo in global';
     sandbox.run(code);
+    // for test
     window.sandbox = sandbox;
     display();
 
