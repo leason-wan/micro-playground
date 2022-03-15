@@ -25,7 +25,6 @@ function render(props = {}) {
     render: h => h(App),
   }).$mount(container ? container.querySelector('#app') : '#app');
 }
-
 if (!window.__POWERED_BY_QIANKUN__) {
   render();
 }
@@ -37,6 +36,7 @@ export async function bootstrap() {
 export async function mount(props) {
   // console.log('[vue] props from main framework', props);
   // storeTest(props);
+  console.log('micro app mounted');
   render(props);
 }
 
@@ -44,5 +44,6 @@ export async function unmount() {
   instance.$destroy();
   instance.$el.innerHTML = '';
   instance = null;
+  console.log('micro app unmount');
   // router = null;
 }

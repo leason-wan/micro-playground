@@ -18,7 +18,7 @@ function exeCode(code, sandbox) {
 
 function createSandbox(plugins = []) {
   const sandbox = {
-    running: false
+    isRun: false
   };
   const rawWindow = window;
   // 创建一个 iframe 对象，取出其中的原生浏览器全局对象作为沙箱的全局对象
@@ -77,7 +77,7 @@ function createSandbox(plugins = []) {
       const {beforeDestroy} = plugin;
       beforeDestroy(sandbox.global);
     })
-    sandbox.running = false;
+    sandbox.isRun = false;
     sandbox.global = {};
   }
 

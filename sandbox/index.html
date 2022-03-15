@@ -14,8 +14,10 @@
     
     const code = `
       // test proxy vars
-      foo = 'foo in sandBox';
-      console.log(foo);
+      window.name = 'name of sandBox window';
+      window.nameOutside = 'changed';
+      console.log(window.name);
+      console.log(window.nameOutside);
       // test listeners
       window.addEventListener('click', function() {
         console.log('you click the window');
