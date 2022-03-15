@@ -14,17 +14,15 @@
     
     const code = `
       // test proxy vars
-      window.name = 'name of sandBox window';
-      window.nameOutside = 'changed';
-      console.log(window.name);
-      console.log(window.nameOutside);
+      foo = 'foo in sandbox';
+      console.log(foo);
       // test listeners
       window.addEventListener('click', function() {
         console.log('you click the window');
       });
       // test interval
       window.setInterval(() => console.log('interval print!'), 1000)
-      window.alert('Hello from sandbox');
+      alert('Hello from sandbox');
     `;
 
     const sandbox = createSandbox();
@@ -36,12 +34,12 @@
 
     function display() {
       const appDom = document.querySelector('#app');
-      appDom.innerHTML = sandbox.running ? '沙箱已启动' : '沙箱已被销毁';
+      appDom.innerHTML = sandbox.isRun ? '沙箱已启动' : '沙箱已被销毁';
     }
 
     const button = document.querySelector('#button');
     button.addEventListener('click', () => {
-      sandbox.running ? sandbox.destory() : sandbox.run(code);
+      sandbox.isRun ? sandbox.destory() : sandbox.run(code);
       display();
     })
     

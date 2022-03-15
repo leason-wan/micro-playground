@@ -1,4 +1,4 @@
-import {corePlugin} from "./plugins/index.js";
+import { corePlugin } from "./plugins/index.js";
 
 function exeCode(code, sandbox) {
   window.SANDBOX_GLOBAL_CONTEXT = sandbox.global;
@@ -10,7 +10,7 @@ function exeCode(code, sandbox) {
 
   try {
     (0, eval)(_code);
-    sandbox.running = true;
+    sandbox.isRun = true;
   } catch (error) {
     console.error(`[sandbox runtime error]: ${error}`);
   }
@@ -22,39 +22,36 @@ function createSandbox(plugins = []) {
   };
   const rawWindow = window;
   // 创建一个 iframe 对象，取出其中的原生浏览器全局对象作为沙箱的全局对象
-  const iframe = document.createElement('iframe', {url: 'about:blank'})
+  const iframe = document.createElement('iframe', {
+    src: 'about:blank',
+    sandbox: "allow-scripts allow-same-origin allow-popups allow-presentation allow-top-navigation",
+    style: 'display: none;',
+  })
   iframe.setAttribute('style', 'display: none;');
-  // iframe.setAttribute('sandbox', 'allow-modals');
   document.body.appendChild(iframe)
   // 沙箱运行时的全局对象
-  // const fakeWindow = iframe.contentWindow
-  const fakeWindow = Object.create(null);
-  // fakeWindow.foo = 'foo';
+  const fakeWindow = iframe.contentWindow
   plugins = [corePlugin, ...plugins];
 
   sandbox.run = function run(code) {
     // 处理变量状态
     sandbox.global = new Proxy(fakeWindow, {
       get(target, property) {
-        // avoid who using window.window or window.self to escape the sandbox environment to touch the really window
+        // 避免沙盒逃逸 window.window or window.self
         if (property === 'top' || property === 'parent' || property === 'window' || property === 'self') {
           return sandbox.global;
         }
-        // 如果值为函数，则需要绑定window对象，如：console、alert等
-        // const rawValue = Reflect.get(rawWindow, property);
-        // console.log(property, 'get--------', rawValue);
-        // if (property === 'console' || property === 'alert') {
-          // console.log(property, 'get from global');
-          // console.log(rawValue);
-          // return rawValue.bind(rawWindow);
-        //   return rawValue;
-        // }
+        const rawValue = Reflect.get(rawWindow, property);
+        // 全局函数属性，需要绑定全局对象，如：alert等
+        if (property === 'alert') {
+          return rawValue.bind(rawWindow);
+        }
         // 沙盒有值取沙盒
         if (Reflect.has(target, property)) {
           return Reflect.get(target, property)
         }
         // 全局状态兜底取值
-        return Reflect.get(rawWindow, property);
+        return rawValue;
       },
       set(target, property, value) {
         target[property] = value;
@@ -66,7 +63,7 @@ function createSandbox(plugins = []) {
     });
 
     plugins.forEach((plugin) => {
-      const {beforeStart} = plugin;
+      const { beforeStart } = plugin;
       beforeStart(sandbox.global);
     })
     exeCode(code, sandbox);
@@ -74,7 +71,7 @@ function createSandbox(plugins = []) {
 
   sandbox.destory = function destory() {
     plugins.forEach((plugin) => {
-      const {beforeDestroy} = plugin;
+      const { beforeDestroy } = plugin;
       beforeDestroy(sandbox.global);
     })
     sandbox.isRun = false;
